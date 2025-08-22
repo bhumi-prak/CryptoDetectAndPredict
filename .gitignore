@@ -1,0 +1,11 @@
+__pycache__/
+.pythonlibs/
+.local/
+.cache/
+.venv/
+*.pyc
+*.pkl
+*.zip
+*.tar.gz
+*.egg-info/
+

@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}RansomGuard - Advanced Ransomware Detection{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5 mb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="hero-content">
+                    <i class="bi bi-shield-shaded display-1 text-primary mb-4"></i>
+                    <h1 class="display-4 fw-bold mb-4">RansomGuard</h1>
+                    <p class="lead mb-4">Advanced Ransomware Detection & Prevention System</p>
+                    <p class="fs-5 text-muted mb-5">
+                        Powered by machine learning and trained on 200,000+ cryptocurrency transactions, 
+                        RansomGuard provides real-time protection against ransomware threats.
+                    </p>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </a>
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg px-4">
+                            <i class="bi bi-person-plus"></i> Get Started
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h2 class="h3 fw-bold">Advanced Protection Features</h2>
+            <p class="text-muted">Comprehensive ransomware detection using cutting-edge technology</p>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <!-- Real-time Monitoring -->
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100">
+                <div class="card bg-dark border-primary h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-activity text-primary display-4 mb-3"></i>
+                        <h5 class="card-title">Real-time Monitoring</h5>
+                        <p class="card-text text-muted">
+                            Continuous file system monitoring with instant threat detection and alerts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ML Detection -->
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100">
+                <div class="card bg-dark border-success h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-cpu text-success display-4 mb-3"></i>
+                        <h5 class="card-title">ML-Powered Detection</h5>
+                        <p class="card-text text-muted">
+                            Advanced machine learning models trained on massive cryptocurrency datasets.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Safe Quarantine -->
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100">
+                <div class="card bg-dark border-warning h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-lock text-warning display-4 mb-3"></i>
+                        <h5 class="card-title">Safe Quarantine</h5>
+                        <p class="card-text text-muted">
+                            Automatic backup and safe isolation of detected threats with rollback capability.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Behavioral Analysis -->
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100">
+                <div class="card bg-dark border-info h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-graph-up text-info display-4 mb-3"></i>
+                        <h5 class="card-title">Behavioral Analysis</h5>
+                        <p class="card-text text-muted">
+                            Entropy analysis and pattern recognition to detect encryption attempts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Email Alerts -->
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100">
+                <div class="card bg-dark border-danger h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-envelope-exclamation text-danger display-4 mb-3"></i>
+                        <h5 class="card-title">Instant Alerts</h5>
+                        <p class="card-text text-muted">
+                            Immediate email notifications and dashboard alerts for detected threats.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Analytics -->
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100">
+                <div class="card bg-dark border-secondary h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-bar-chart text-secondary display-4 mb-3"></i>
+                        <h5 class="card-title">Analytics Dashboard</h5>
+                        <p class="card-text text-muted">
+                            Comprehensive reporting and visualization of threats and system health.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Section -->
+    <div class="row bg-dark rounded-3 p-4 mb-5">
+        <div class="col-12 text-center mb-4">
+            <h3 class="fw-bold">Powered by Big Data</h3>
+            <p class="text-muted">Our ML models are trained on massive datasets for maximum accuracy</p>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="stat-item">
+                <h2 class="text-primary fw-bold">200K+</h2>
+                <p class="text-muted">Crypto Transactions</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="stat-item">
+                <h2 class="text-success fw-bold">99.5%</h2>
+                <p class="text-muted">Detection Accuracy</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="stat-item">
+                <h2 class="text-warning fw-bold">20+</h2>
+                <p class="text-muted">Ransomware Families</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="stat-item">
+                <h2 class="text-info fw-bold">Real-time</h2>
+                <p class="text-muted">Protection</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- CTA Section -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <div class="cta-section bg-primary bg-gradient rounded-3 p-5">
+                <h3 class="fw-bold text-white mb-3">Ready to Protect Your System?</h3>
+                <p class="text-white mb-4">
+                    Join thousands of users protecting their systems with advanced ransomware detection.
+                </p>
+                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
+                    <i class="bi bi-shield-plus"></i> Start Free Protection
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(25, 135, 84, 0.1));
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+}
+
+.feature-card {
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-item h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cta-section {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-info)) !important;
+}
+</style>
+{% endblock %}

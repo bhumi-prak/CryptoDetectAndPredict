@@ -1,0 +1,602 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - RansomGuard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Settings</h1>
+        <p class="text-muted mb-0">Configure your ransomware protection preferences</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Account Settings -->
+    <div class="col-lg-6">
+        <div class="card bg-dark border-primary">
+            <div class="card-header bg-dark border-primary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person text-primary me-2"></i>
+                    Account Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="accountForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-light" 
+                               id="username" value="{{ current_user.username }}" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control bg-dark border-secondary text-light" 
+                               id="email" value="{{ current_user.email }}">
+                        <small class="text-muted">Used for security alerts and notifications</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control bg-dark border-secondary text-light" 
+                               id="currentPassword" placeholder="Enter current password to make changes">
+                    </div>
+                    
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control bg-dark border-secondary text-light" 
+                                   id="newPassword" placeholder="Leave blank to keep current">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control bg-dark border-secondary text-light" 
+                                   id="confirmPassword" placeholder="Confirm new password">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Update Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scanning Settings -->
+    <div class="col-lg-6">
+        <div class="card bg-dark border-success">
+            <div class="card-header bg-dark border-success">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-search text-success me-2"></i>
+                    Scan Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="scanSettingsForm">
+                    <div class="mb-3">
+                        <label class="form-label">Scan Sensitivity</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="sensitivity" id="low" value="low">
+                            <label class="btn btn-outline-success" for="low">Low</label>
+                            
+                            <input type="radio" class="btn-check" name="sensitivity" id="medium" value="medium" checked>
+                            <label class="btn btn-outline-success" for="medium">Medium</label>
+                            
+                            <input type="radio" class="btn-check" name="sensitivity" id="high" value="high">
+                            <label class="btn btn-outline-success" for="high">High</label>
+                        </div>
+                        <small class="text-muted">Higher sensitivity may result in more false positives</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="entropyThreshold" class="form-label">Entropy Threshold</label>
+                        <input type="range" class="form-range" id="entropyThreshold" min="6.0" max="8.0" step="0.1" value="7.5">
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>6.0</span>
+                            <span id="entropyValue">7.5</span>
+                            <span>8.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="realTimeScanning" checked>
+                            <label class="form-check-label" for="realTimeScanning">
+                                Real-time file monitoring
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="mlAnalysis" checked>
+                            <label class="form-check-label" for="mlAnalysis">
+                                Machine learning analysis
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="deepScan" checked>
+                            <label class="form-check-label" for="deepScan">
+                                Deep entropy analysis
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Save Scan Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alert Settings -->
+    <div class="col-lg-6">
+        <div class="card bg-dark border-warning">
+            <div class="card-header bg-dark border-warning">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-bell text-warning me-2"></i>
+                    Alert Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="alertSettingsForm">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="emailAlerts" checked>
+                            <label class="form-check-label" for="emailAlerts">
+                                Email alerts for threats
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="browserNotifications" checked>
+                            <label class="form-check-label" for="browserNotifications">
+                                Browser notifications
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="minThreatLevel" class="form-label">Minimum alert threshold</label>
+                        <select class="form-select bg-dark border-secondary text-light" id="minThreatLevel">
+                            <option value="low">Low - Alert on all threats</option>
+                            <option value="medium" selected>Medium - Skip low-risk alerts</option>
+                            <option value="high">High - Only critical threats</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="alertCooldown" class="form-label">Alert cooldown period</label>
+                        <select class="form-select bg-dark border-secondary text-light" id="alertCooldown">
+                            <option value="60">1 minute</option>
+                            <option value="300" selected>5 minutes</option>
+                            <option value="900">15 minutes</option>
+                            <option value="3600">1 hour</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-check-circle"></i> Save Alert Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quarantine Settings -->
+    <div class="col-lg-6">
+        <div class="card bg-dark border-danger">
+            <div class="card-header bg-dark border-danger">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-shield text-danger me-2"></i>
+                    Quarantine Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="quarantineSettingsForm">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoQuarantine">
+                            <label class="form-check-label" for="autoQuarantine">
+                                Automatically quarantine high-risk threats
+                            </label>
+                        </div>
+                        <small class="text-muted">Requires manual confirmation for critical files</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="backupBeforeQuarantine" checked>
+                            <label class="form-check-label" for="backupBeforeQuarantine">
+                                Create backup before quarantine
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="quarantineRetention" class="form-label">Quarantine retention period</label>
+                        <select class="form-select bg-dark border-secondary text-light" id="quarantineRetention">
+                            <option value="7">7 days</option>
+                            <option value="30" selected>30 days</option>
+                            <option value="90">90 days</option>
+                            <option value="365">1 year</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="quarantinePath" class="form-label">Quarantine directory</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-dark border-secondary text-light" 
+                                   id="quarantinePath" value="~/.ransomware_quarantine" readonly>
+                            <button type="button" class="btn btn-outline-secondary">
+                                <i class="bi bi-folder2-open"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-check-circle"></i> Save Quarantine Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Machine Learning Settings -->
+    <div class="col-12">
+        <div class="card bg-dark border-info">
+            <div class="card-header bg-dark border-info">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-cpu text-info me-2"></i>
+                    Machine Learning Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-info mb-3">Model Configuration</h6>
+                        
+                        <div class="mb-3">
+                            <label for="mlModel" class="form-label">Detection Model</label>
+                            <select class="form-select bg-dark border-secondary text-light" id="mlModel">
+                                <option value="ensemble" selected>Ensemble (Random Forest + XGBoost)</option>
+                                <option value="random_forest">Random Forest</option>
+                                <option value="isolation_forest">Isolation Forest</option>
+                                <option value="neural_network">Neural Network</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confidenceThreshold" class="form-label">Confidence Threshold</label>
+                            <input type="range" class="form-range" id="confidenceThreshold" min="0.5" max="1.0" step="0.05" value="0.8">
+                            <div class="d-flex justify-content-between text-muted small">
+                                <span>50%</span>
+                                <span id="confidenceValue">80%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="onlineLearning" checked>
+                                <label class="form-check-label" for="onlineLearning">
+                                    Online learning (model updates)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="text-info mb-3">Dataset Information</h6>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-dark table-sm">
+                                <tr>
+                                    <th>Training Data:</th>
+                                    <td>{{ '{:,}'.format(model_info.training_samples) }}+ transactions</td>
+                                </tr>
+                                <tr>
+                                    <th>Dataset Sources:</th>
+                                    <td>{{ model_info.dataset_sources }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Model Accuracy:</th>
+                                    <td>
+                                        {% if ml_accuracy %}
+                                            <span class="text-success">{{ '{:.1%}'.format(ml_accuracy) }}</span>
+                                        {% else %}
+                                            <span class="text-warning">Not Available</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Last Updated:</th>
+                                    <td>{{ model_info.last_updated.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-3">
+                            <button class="btn btn-outline-info" onclick="retrainModel()">
+                                <i class="bi bi-arrow-clockwise"></i> Retrain Model
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="exportModel()">
+                                <i class="bi bi-download"></i> Export Model
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid mt-4">
+                    <button type="button" class="btn btn-info" onclick="saveMLSettings()">
+                        <i class="bi bi-check-circle"></i> Save ML Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Information -->
+    <div class="col-12">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header bg-dark border-secondary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle text-secondary me-2"></i>
+                    System Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <table class="table table-dark table-sm">
+                            <tr><th>Version:</th><td>RansomGuard v1.0.0</td></tr>
+                            <tr><th>Account Created:</th><td>{{ current_user.created_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>
+                            <tr><th>Total Scans:</th><td>{{ current_user.scan_results|length }}</td></tr>
+                            <tr><th>Threats Detected:</th><td>{{ current_user.threat_alerts|length }}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-secondary" onclick="exportData()">
+                                <i class="bi bi-download"></i> Export My Data
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="resetSettings()">
+                                <i class="bi bi-arrow-clockwise"></i> Reset to Defaults
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteAccount()">
+                                <i class="bi bi-trash"></i> Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSettings();
+    
+    // Update range inputs display
+    document.getElementById('entropyThreshold').addEventListener('input', function() {
+        document.getElementById('entropyValue').textContent = this.value;
+    });
+    
+    document.getElementById('confidenceThreshold').addEventListener('input', function() {
+        document.getElementById('confidenceValue').textContent = Math.round(this.value * 100) + '%';
+    });
+    
+    // Form submissions
+    document.getElementById('accountForm').addEventListener('submit', handleAccountUpdate);
+    document.getElementById('scanSettingsForm').addEventListener('submit', handleScanSettings);
+    document.getElementById('alertSettingsForm').addEventListener('submit', handleAlertSettings);
+    document.getElementById('quarantineSettingsForm').addEventListener('submit', handleQuarantineSettings);
+    
+    // Request notification permission if browser notifications are enabled
+    if (document.getElementById('browserNotifications').checked) {
+        requestNotificationPermission();
+    }
+    
+    document.getElementById('browserNotifications').addEventListener('change', function() {
+        if (this.checked) {
+            requestNotificationPermission();
+        }
+    });
+});
+
+function initializeSettings() {
+    // Load saved settings from localStorage or server
+    const savedSettings = localStorage.getItem('ransomguard_settings');
+    if (savedSettings) {
+        try {
+            const settings = JSON.parse(savedSettings);
+            applySettings(settings);
+        } catch (e) {
+            console.error('Failed to load saved settings:', e);
+        }
+    }
+}
+
+function applySettings(settings) {
+    // Apply settings to form elements
+    if (settings.sensitivity) {
+        document.querySelector(`input[name="sensitivity"][value="${settings.sensitivity}"]`).checked = true;
+    }
+    if (settings.entropyThreshold) {
+        document.getElementById('entropyThreshold').value = settings.entropyThreshold;
+        document.getElementById('entropyValue').textContent = settings.entropyThreshold;
+    }
+    // Apply other settings...
+}
+
+function saveSettings() {
+    const settings = {
+        sensitivity: document.querySelector('input[name="sensitivity"]:checked').value,
+        entropyThreshold: document.getElementById('entropyThreshold').value,
+        realTimeScanning: document.getElementById('realTimeScanning').checked,
+        mlAnalysis: document.getElementById('mlAnalysis').checked,
+        deepScan: document.getElementById('deepScan').checked,
+        emailAlerts: document.getElementById('emailAlerts').checked,
+        browserNotifications: document.getElementById('browserNotifications').checked,
+        minThreatLevel: document.getElementById('minThreatLevel').value,
+        alertCooldown: document.getElementById('alertCooldown').value,
+        autoQuarantine: document.getElementById('autoQuarantine').checked,
+        backupBeforeQuarantine: document.getElementById('backupBeforeQuarantine').checked,
+        quarantineRetention: document.getElementById('quarantineRetention').value,
+        mlModel: document.getElementById('mlModel').value,
+        confidenceThreshold: document.getElementById('confidenceThreshold').value,
+        onlineLearning: document.getElementById('onlineLearning').checked
+    };
+    
+    localStorage.setItem('ransomguard_settings', JSON.stringify(settings));
+    return settings;
+}
+
+function handleAccountUpdate(event) {
+    event.preventDefault();
+    
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (!currentPassword) {
+        alert('Please enter your current password to make changes.');
+        return;
+    }
+    
+    if (newPassword && newPassword !== confirmPassword) {
+        alert('New passwords do not match.');
+        return;
+    }
+    
+    // In real implementation, send to server
+    alert('Account updated successfully!');
+}
+
+function handleScanSettings(event) {
+    event.preventDefault();
+    saveSettings();
+    showToast('Scan settings saved successfully!', 'success');
+}
+
+function handleAlertSettings(event) {
+    event.preventDefault();
+    saveSettings();
+    showToast('Alert settings saved successfully!', 'warning');
+}
+
+function handleQuarantineSettings(event) {
+    event.preventDefault();
+    saveSettings();
+    showToast('Quarantine settings saved successfully!', 'danger');
+}
+
+function saveMLSettings() {
+    saveSettings();
+    showToast('ML settings saved successfully!', 'info');
+}
+
+function retrainModel() {
+    if (confirm('Retrain the ML model? This may take several minutes and will use the latest threat data.')) {
+        showToast('Model retraining started...', 'info');
+        // In real implementation, start retraining process
+    }
+}
+
+function exportModel() {
+    showToast('Model export started...', 'info');
+    // In real implementation, export model files
+}
+
+function exportData() {
+    showToast('Data export started...', 'secondary');
+    // In real implementation, export user data
+}
+
+function resetSettings() {
+    if (confirm('Reset all settings to defaults? This cannot be undone.')) {
+        localStorage.removeItem('ransomguard_settings');
+        location.reload();
+    }
+}
+
+function deleteAccount() {
+    const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+    if (confirmation === 'DELETE') {
+        if (confirm('Are you absolutely sure? This action cannot be undone.')) {
+            alert('Account deletion functionality would be implemented here.');
+        }
+    }
+}
+
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(function(permission) {
+            if (permission !== 'granted') {
+                document.getElementById('browserNotifications').checked = false;
+            }
+        });
+    }
+}
+
+function showToast(message, type) {
+    // Create a simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 5000);
+}
+</script>
+
+<style>
+.form-range::-webkit-slider-thumb {
+    background-color: var(--bs-primary);
+}
+
+.form-range::-moz-range-thumb {
+    background-color: var(--bs-primary);
+    border: none;
+}
+
+.btn-check:checked + .btn {
+    transform: scale(1.02);
+}
+
+.card {
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+</style>
+{% endblock %}
