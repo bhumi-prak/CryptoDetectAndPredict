@@ -571,6 +571,7 @@ body {
   background-color: var(--bs-primary);
   color: white;
 }
+<<<<<<< HEAD
 
 /* 🌞 Default Light Theme (already your base styles) */
 
@@ -594,3 +595,5 @@ button.dark-mode {
   background-color: #333;
   color: #fff;
 }
+=======
+>>>>>>> b4af72027f543e9bd02f1796d654937528236236
