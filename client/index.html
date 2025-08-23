@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RansomShield - Advanced Ransomware Detection</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>RansomShield</span>
+                </div>
+                <div class="nav-menu" id="nav-menu">
+                    <a href="#" class="nav-link" onclick="showPage('dashboard')">Dashboard</a>
+                    <a href="#" class="nav-link" onclick="showPage('analysis')">File Analysis</a>
+                    <a href="#" class="nav-link" onclick="showPage('models')">ML Models</a>
+                    <a href="#" class="nav-link" onclick="showPage('backup')">Backup</a>
+                    <a href="#" class="nav-link" onclick="logout()">Logout</a>
+                </div>
+                <div class="nav-toggle" onclick="toggleNav()">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Login Page -->
+        <div id="login-page" class="page active">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <i class="fas fa-shield-alt"></i>
+                        <h1>RansomShield</h1>
+                        <p>Advanced Ransomware Detection & Prevention</p>
+                    </div>
+                    
+                    <form id="login-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                    
+                    <div class="auth-switch">
+                        <p>Don't have an account? <a href="#" onclick="showPage('signup')">Sign up</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Page -->
+        <div id="signup-page" class="page">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <i class="fas fa-user-plus"></i>
+                        <h1>Create Account</h1>
+                        <p>Join RansomShield Protection</p>
+                    </div>
+                    
+                    <form id="signup-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="signup-name">Full Name</label>
+                            <input type="text" id="signup-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    </form>
+                    
+                    <div class="auth-switch">
+                        <p>Already have an account? <a href="#" onclick="showPage('login')">Login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h1>Threat Detection Dashboard</h1>
+                    <div class="user-info">
+                        <span id="user-name">Welcome back!</span>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon threat-high">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="high-threats">0</h3>
+                            <p>High Threats</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon threat-medium">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="medium-threats">0</h3>
+                            <p>Medium Threats</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon files-scanned">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="files-scanned">0</h3>
+                            <p>Files Scanned</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon accuracy">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="model-accuracy">--</h3>
+                            <p>ML Accuracy</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-content">
+                    <div class="chart-container">
+                        <h2>Threat Detection Timeline</h2>
+                        <canvas id="threat-chart"></canvas>
+                    </div>
+                    
+                    <div class="threat-list">
+                        <h2>Recent Threats</h2>
+                        <div id="threat-items">
+                            <!-- Threat items will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Analysis Page -->
+        <div id="analysis-page" class="page">
+            <div class="analysis-container">
+                <h1>File Analysis</h1>
+                
+                <div class="upload-section">
+                    <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload file for analysis</p>
+                        <input type="file" id="file-input" hidden onchange="analyzeFile()">
+                    </div>
+                </div>
+                
+                <div class="analysis-results" id="analysis-results">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ML Models Page -->
+        <div id="models-page" class="page">
+            <div class="models-container">
+                <h1>Machine Learning Models</h1>
+                
+                <div class="training-section">
+                    <h2>Train New Model</h2>
+                    <div class="training-options">
+                        <select id="algorithm-select">
+                            <option value="ensemble">Random Forest + XGBoost Ensemble</option>
+                            <option value="random_forest">Random Forest</option>
+                            <option value="xgboost">XGBoost</option>
+                        </select>
+                        <select id="dataset-size">
+                            <option value="50000">Large Dataset (50k samples)</option>
+                            <option value="100000">Extra Large (100k samples)</option>
+                            <option value="200000">Maximum (200k samples)</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="trainModel()">Start Training</button>
+                    </div>
+                </div>
+                
+                <div class="models-list" id="models-list">
+                    <!-- Models will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup Page -->
+        <div id="backup-page" class="page">
+            <div class="backup-container">
+                <h1>Backup & Recovery</h1>
+                
+                <div class="backup-status">
+                    <div class="backup-card">
+                        <i class="fas fa-cloud"></i>
+                        <h3>Cloud Backup</h3>
+                        <p>Status: <span class="status-active">Active</span></p>
+                        <button class="btn btn-secondary">Configure</button>
+                    </div>
+                    
+                    <div class="backup-card">
+                        <i class="fas fa-hdd"></i>
+                        <h3>Local Backup</h3>
+                        <p>Status: <span class="status-active">Active</span></p>
+                        <button class="btn btn-secondary">Manage</button>
+                    </div>
+                </div>
+                
+                <div class="backup-history">
+                    <h2>Backup History</h2>
+                    <div id="backup-history-list">
+                        <!-- Backup history will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

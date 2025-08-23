@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - RansomGuard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Security Dashboard</h1>
+        <p class="text-muted mb-0">Real-time ransomware protection status</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" onclick="refreshDashboard()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+        <a href="{{ url_for('scanner_page') }}" class="btn btn-primary">
+            <i class="bi bi-search"></i> Quick Scan
+        </a>
+    </div>
+</div>
+
+<!-- System Status Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-dark border-success h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-shield-check text-success display-6"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-success fw-semibold">System Status</div>
+                        <div class="h5 mb-0" id="systemStatus">Protected</div>
+                        <small class="text-muted">Real-time monitoring active</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-dark border-primary h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-search text-primary display-6"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-primary fw-semibold">Total Scans</div>
+                        <div class="h5 mb-0">{{ total_scans }}</div>
+                        <small class="text-muted">Completed scans</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-dark border-warning h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-exclamation-triangle text-warning display-6"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-warning fw-semibold">Threats Detected</div>
+                        <div class="h5 mb-0">{{ total_threats }}</div>
+                        <small class="text-muted">All time</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-dark border-danger h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-bell text-danger display-6"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-danger fw-semibold">Active Alerts</div>
+                        <div class="h5 mb-0">{{ unread_alerts }}</div>
+                        <small class="text-muted">Unread notifications</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Grid -->
+<div class="row g-4">
+    <!-- System Metrics -->
+    <div class="col-lg-8">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-header bg-dark border-secondary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up text-info me-2"></i>
+                    System Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="systemMetricsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Current System Status -->
+    <div class="col-lg-4">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-header bg-dark border-secondary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-cpu text-primary me-2"></i>
+                    Live Metrics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>CPU Usage</span>
+                    <span id="cpuUsage" class="fw-bold">--%</span>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                    <div id="cpuProgress" class="progress-bar bg-primary" style="width: 0%"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Memory Usage</span>
+                    <span id="memoryUsage" class="fw-bold">--%</span>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                    <div id="memoryProgress" class="progress-bar bg-info" style="width: 0%"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Disk Usage</span>
+                    <span id="diskUsage" class="fw-bold">--%</span>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                    <div id="diskProgress" class="progress-bar bg-warning" style="width: 0%"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Threat Level</span>
+                    <span id="threatLevel" class="badge bg-success">Low</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Scans -->
+    <div class="col-lg-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header bg-dark border-secondary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history text-secondary me-2"></i>
+                    Recent Scans
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_scans %}
+                <div class="list-group list-group-flush bg-dark">
+                    {% for scan in recent_scans %}
+                    <div class="list-group-item bg-dark border-secondary">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ scan.scan_type.title() }} Scan</h6>
+                                <p class="mb-1 text-muted">{{ scan.target_path }}</p>
+                                <small class="text-muted">
+                                    {{ scan.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                {% if scan.status == 'completed' %}
+                                <span class="badge bg-success">Completed</span>
+                                {% elif scan.status == 'scanning' %}
+                                <span class="badge bg-warning">Scanning</span>
+                                {% else %}
+                                <span class="badge bg-danger">Failed</span>
+                                {% endif %}
+                                <div class="mt-1">
+                                    <small class="text-muted">{{ scan.threats_found }} threats</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-search text-muted display-4"></i>
+                    <p class="text-muted mt-2">No scans performed yet</p>
+                    <a href="{{ url_for('scanner_page') }}" class="btn btn-primary">
+                        Start First Scan
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Threat Distribution -->
+    <div class="col-lg-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header bg-dark border-secondary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-pie-chart text-warning me-2"></i>
+                    Threat Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if threat_levels %}
+                <canvas id="threatChart" width="400" height="300"></canvas>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-shield-check text-success display-4"></i>
+                    <p class="text-muted mt-2">No threats detected</p>
+                    <p class="text-success">Your system is clean!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-dark border-primary">
+            <div class="card-header bg-dark border-primary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning text-primary me-2"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{{ url_for('scanner_page') }}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-search d-block mb-2" style="font-size: 1.5rem;"></i>
+                            Quick Scan
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-success w-100" onclick="startFullScan()">
+                            <i class="bi bi-shield-check d-block mb-2" style="font-size: 1.5rem;"></i>
+                            Full Scan
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('threats') }}" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-exclamation-triangle d-block mb-2" style="font-size: 1.5rem;"></i>
+                            View Threats
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('settings') }}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-gear d-block mb-2" style="font-size: 1.5rem;"></i>
+                            Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDashboard();
+    loadSystemMetrics();
+    
+    {% if threat_levels %}
+    const threatData = {{ threat_levels | tojsonfilter | safe }};
+    initializeThreatChart(threatData);
+    {% endif %}
+    
+    // Auto-refresh every 30 seconds
+    setInterval(function() {
+        loadSystemMetrics();
+    }, 30000);
+});
+
+function startFullScan() {
+    if (confirm('Start a full system scan? This may take several minutes.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url_for("start_scan") }}';
+        
+        const scanType = document.createElement('input');
+        scanType.type = 'hidden';
+        scanType.name = 'scan_type';
+        scanType.value = 'full';
+        form.appendChild(scanType);
+        
+        const targetPath = document.createElement('input');
+        targetPath.type = 'hidden';
+        targetPath.name = 'target_path';
+        targetPath.value = '/';
+        form.appendChild(targetPath);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function refreshDashboard() {
+    location.reload();
+}
+</script>
+{% endblock %}

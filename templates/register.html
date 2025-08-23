@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - RansomGuard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card bg-dark border-success">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="bi bi-shield-plus text-success display-4"></i>
+                    <h2 class="h4 fw-bold mt-3">Create Your Account</h2>
+                    <p class="text-muted">Start protecting your system today</p>
+                </div>
+                
+                <form method="POST" id="registerForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control bg-dark border-secondary text-light" 
+                                   id="username" name="username" required autocomplete="username"
+                                   minlength="3" maxlength="30">
+                        </div>
+                        <small class="text-muted">3-30 characters, letters, numbers, and underscores only</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <input type="email" class="form-control bg-dark border-secondary text-light" 
+                                   id="email" name="email" required autocomplete="email">
+                        </div>
+                        <small class="text-muted">For security alerts and notifications</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control bg-dark border-secondary text-light" 
+                                   id="password" name="password" required autocomplete="new-password"
+                                   minlength="6">
+                        </div>
+                        <div class="password-strength mt-1">
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small id="passwordHelp" class="text-muted">Minimum 6 characters</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary">
+                                <i class="bi bi-lock-fill"></i>
+                            </span>
+                            <input type="password" class="form-control bg-dark border-secondary text-light" 
+                                   id="confirm_password" name="confirm_password" required 
+                                   autocomplete="new-password">
+                        </div>
+                        <small id="confirmHelp" class="text-muted"></small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" class="text-primary">Terms of Service</a> 
+                                and <a href="#" class="text-primary">Privacy Policy</a>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                            <i class="bi bi-person-plus"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center">
+                    <p class="text-muted">Already have an account?</p>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Preview -->
+        <div class="card bg-dark border-info mt-3">
+            <div class="card-body">
+                <h6 class="text-info mb-3">What you get with RansomGuard:</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Real-time ransomware detection
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        ML-powered threat analysis
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Instant email alerts
+                    </li>
+                    <li class="mb-0">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Safe quarantine & backup
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.input-group-text {
+    color: var(--bs-light);
+}
+
+.form-control:focus {
+    border-color: var(--bs-success);
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.progress-bar {
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registerForm');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    const terms = document.getElementById('terms');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressBar = document.querySelector('.progress-bar');
+    const passwordHelp = document.getElementById('passwordHelp');
+    const confirmHelp = document.getElementById('confirmHelp');
+    
+    function checkPasswordStrength(pwd) {
+        let strength = 0;
+        let feedback = [];
+        
+        if (pwd.length >= 6) strength += 20;
+        else feedback.push('At least 6 characters');
+        
+        if (pwd.match(/[a-z]/)) strength += 20;
+        else feedback.push('lowercase letter');
+        
+        if (pwd.match(/[A-Z]/)) strength += 20;
+        else feedback.push('uppercase letter');
+        
+        if (pwd.match(/[0-9]/)) strength += 20;
+        else feedback.push('number');
+        
+        if (pwd.match(/[^a-zA-Z0-9]/)) strength += 20;
+        else feedback.push('special character');
+        
+        return { strength, feedback };
+    }
+    
+    function updatePasswordStrength() {
+        const pwd = password.value;
+        const result = checkPasswordStrength(pwd);
+        
+        progressBar.style.width = result.strength + '%';
+        
+        if (result.strength < 40) {
+            progressBar.className = 'progress-bar bg-danger';
+            passwordHelp.textContent = 'Weak - Add: ' + result.feedback.slice(0, 2).join(', ');
+            passwordHelp.className = 'text-danger';
+        } else if (result.strength < 80) {
+            progressBar.className = 'progress-bar bg-warning';
+            passwordHelp.textContent = 'Medium - Consider adding: ' + result.feedback.join(', ');
+            passwordHelp.className = 'text-warning';
+        } else {
+            progressBar.className = 'progress-bar bg-success';
+            passwordHelp.textContent = 'Strong password!';
+            passwordHelp.className = 'text-success';
+        }
+    }
+    
+    function checkPasswordMatch() {
+        if (confirmPassword.value === '') {
+            confirmHelp.textContent = '';
+            confirmHelp.className = 'text-muted';
+            return false;
+        }
+        
+        if (password.value === confirmPassword.value) {
+            confirmHelp.textContent = 'Passwords match!';
+            confirmHelp.className = 'text-success';
+            return true;
+        } else {
+            confirmHelp.textContent = 'Passwords do not match';
+            confirmHelp.className = 'text-danger';
+            return false;
+        }
+    }
+    
+    function validateForm() {
+        const isPasswordStrong = checkPasswordStrength(password.value).strength >= 60;
+        const doPasswordsMatch = checkPasswordMatch();
+        const areTermsAccepted = terms.checked;
+        const isFormFilled = password.value && confirmPassword.value && areTermsAccepted;
+        
+        submitBtn.disabled = !(isPasswordStrong && doPasswordsMatch && isFormFilled);
+    }
+    
+    password.addEventListener('input', function() {
+        updatePasswordStrength();
+        validateForm();
+    });
+    
+    confirmPassword.addEventListener('input', function() {
+        checkPasswordMatch();
+        validateForm();
+    });
+    
+    terms.addEventListener('change', validateForm);
+    
+    form.addEventListener('submit', function(e) {
+        if (submitBtn.disabled) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

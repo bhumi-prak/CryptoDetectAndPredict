@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - RansomGuard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card bg-dark border-primary">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="bi bi-shield-lock text-primary display-4"></i>
+                    <h2 class="h4 fw-bold mt-3">Sign In to RansomGuard</h2>
+                    <p class="text-muted">Access your ransomware protection dashboard</p>
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control bg-dark border-secondary text-light" 
+                                   id="username" name="username" required autocomplete="username">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control bg-dark border-secondary text-light" 
+                                   id="password" name="password" required autocomplete="current-password">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center">
+                    <p class="text-muted">Don't have an account?</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-plus"></i> Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Notice -->
+        <div class="card bg-dark border-warning mt-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-shield-exclamation text-warning me-3"></i>
+                    <div>
+                        <h6 class="mb-1">Security Notice</h6>
+                        <small class="text-muted">
+                            Your login is secured with industry-standard encryption. 
+                            Never share your credentials with anyone.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.input-group-text {
+    color: var(--bs-light);
+}
+
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+</style>
+{% endblock %}

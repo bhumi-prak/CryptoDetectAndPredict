@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+
+{% block title %}Scanner - RansomGuard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1">System Scanner</h1>
+        <p class="text-muted mb-0">Safe read-only scanning for ransomware detection</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" onclick="scanHistory()">
+            <i class="bi bi-clock-history"></i> History
+        </button>
+    </div>
+</div>
+
+<!-- Scan Configuration -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card bg-dark border-primary">
+            <div class="card-header bg-dark border-primary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-gear text-primary me-2"></i>
+                    Scan Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="scanForm" method="POST" action="{{ url_for('start_scan') }}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Scan Type</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="scan_type" id="quick" value="quick" checked>
+                                <label class="btn btn-outline-primary" for="quick">
+                                    <i class="bi bi-lightning"></i> Quick Scan
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="scan_type" id="full" value="full">
+                                <label class="btn btn-outline-warning" for="full">
+                                    <i class="bi bi-search"></i> Full Scan
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="scan_type" id="custom" value="custom">
+                                <label class="btn btn-outline-info" for="custom">
+                                    <i class="bi bi-folder"></i> Custom
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="target_path" class="form-label">Target Path</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-dark border-secondary text-light" 
+                                       id="target_path" name="target_path" value="/" readonly>
+                                <button type="button" class="btn btn-outline-secondary" onclick="browsePath()">
+                                    <i class="bi bi-folder2-open"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="deepScan" checked>
+                                <label class="form-check-label" for="deepScan">
+                                    Deep entropy analysis
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="hashCheck" checked>
+                                <label class="form-check-label" for="hashCheck">
+                                    Hash-based detection
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="mlAnalysis" checked>
+                                <label class="form-check-label" for="mlAnalysis">
+                                    ML analysis
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg" id="startScanBtn">
+                            <i class="bi bi-play-circle"></i> Start Scan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scan Statistics -->
+    <div class="col-lg-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header bg-dark border-secondary">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-bar-chart text-info me-2"></i>
+                    Quick Stats
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Total Scans</span>
+                    <span class="badge bg-primary">{{ current_user.scan_results|length }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Threats Found</span>
+                    <span class="badge bg-warning">{{ current_user.threat_alerts|length }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Files Quarantined</span>
+                    <span class="badge bg-danger">0</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Last Scan</span>
+                    <span class="text-muted small">
+                        {% if current_user.scan_results %}
+                            {{ current_user.scan_results[-1].created_at.strftime('%m/%d %H:%M') }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Safe Scanning Info -->
+        <div class="card bg-dark border-success mt-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-shield-check text-success me-3 display-6"></i>
+                    <div>
+                        <h6 class="text-success mb-1">Safe Scanning</h6>
+                        <small class="text-muted">
+                            Read-only analysis with automatic backup before any action
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scan Progress (Hidden by default) -->
+<div id="scanProgress" class="card bg-dark border-warning mb-4" style="display: none;">
+    <div class="card-header bg-dark border-warning">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-gear-fill text-warning me-2 spin"></i>
+            Scan in Progress
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between mb-2">
+                    <span id="scanStatus">Initializing scan...</span>
+                    <span id="scanPercent">0%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div id="progressBar" class="progress-bar bg-warning progress-bar-striped progress-bar-animated" 
+                         style="width: 0%"></div>
+                </div>
+                <div class="row text-center mt-3">
+                    <div class="col">
+                        <div class="h5 mb-0" id="filesScanned">0</div>
+                        <small class="text-muted">Files Scanned</small>
+                    </div>
+                    <div class="col">
+                        <div class="h5 mb-0" id="threatsFound">0</div>
+                        <small class="text-muted">Threats Found</small>
+                    </div>
+                    <div class="col">
+                        <div class="h5 mb-0" id="scanTime">00:00</div>
+                        <small class="text-muted">Elapsed Time</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <button class="btn btn-outline-danger" onclick="stopScan()">
+                    <i class="bi bi-stop-circle"></i> Stop Scan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scan Results -->
+{% if scan %}
+<div class="card bg-dark border-secondary">
+    <div class="card-header bg-dark border-secondary">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-file-text text-secondary me-2"></i>
+            Scan Results
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 text-center">
+                <div class="h4 text-primary">{{ scan.files_scanned or 0 }}</div>
+                <div class="text-muted">Files Scanned</div>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="h4 text-warning">{{ scan.threats_found or 0 }}</div>
+                <div class="text-muted">Threats Detected</div>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="h4 text-info">{{ "%.2f"|format(scan.scan_duration or 0) }}s</div>
+                <div class="text-muted">Scan Duration</div>
+            </div>
+            <div class="col-md-3 text-center">
+                {% if scan.status == 'completed' %}
+                <div class="h4 text-success"><i class="bi bi-check-circle"></i></div>
+                <div class="text-muted">Completed</div>
+                {% elif scan.status == 'scanning' %}
+                <div class="h4 text-warning"><i class="bi bi-hourglass-split"></i></div>
+                <div class="text-muted">In Progress</div>
+                {% else %}
+                <div class="h4 text-danger"><i class="bi bi-x-circle"></i></div>
+                <div class="text-muted">Failed</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if threats %}
+        <h6 class="border-bottom pb-2 mb-3">Detected Threats</h6>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <th>File Path</th>
+                        <th>Threat Level</th>
+                        <th>Confidence</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for threat in threats %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                <span class="text-truncate" style="max-width: 300px;" title="{{ threat.file_path }}">
+                                    {{ threat.file_path }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if threat.threat_level == 'critical' %}
+                            <span class="badge bg-danger">Critical</span>
+                            {% elif threat.threat_level == 'high' %}
+                            <span class="badge bg-warning">High</span>
+                            {% elif threat.threat_level == 'medium' %}
+                            <span class="badge bg-info">Medium</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Low</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ "%.1f"|format(threat.confidence_score * 100) }}%</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-warning" onclick="quarantineThreat({{ threat.id }})" 
+                                        {% if threat.quarantined %}disabled{% endif %}>
+                                    {% if threat.quarantined %}
+                                    <i class="bi bi-check"></i> Quarantined
+                                    {% else %}
+                                    <i class="bi bi-shield"></i> Quarantine
+                                    {% endif %}
+                                </button>
+                                <button class="btn btn-outline-info" onclick="analyzeThreat({{ threat.id }})">
+                                    <i class="bi bi-info-circle"></i> Details
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-shield-check text-success display-4"></i>
+            <p class="text-success mt-2 h5">No threats detected!</p>
+            <p class="text-muted">Your system appears to be clean.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeScanner();
+    
+    // Handle scan type changes
+    document.querySelectorAll('input[name="scan_type"]').forEach(radio => {
+        radio.addEventListener('change', updateScanType);
+    });
+    
+    // Handle form submission
+    document.getElementById('scanForm').addEventListener('submit', handleScanSubmit);
+});
+
+function updateScanType() {
+    const scanType = document.querySelector('input[name="scan_type"]:checked').value;
+    const targetPath = document.getElementById('target_path');
+    
+    switch(scanType) {
+        case 'quick':
+            targetPath.value = '/home /tmp /var/tmp';
+            targetPath.readOnly = true;
+            break;
+        case 'full':
+            targetPath.value = '/';
+            targetPath.readOnly = true;
+            break;
+        case 'custom':
+            targetPath.value = '';
+            targetPath.readOnly = false;
+            targetPath.focus();
+            break;
+    }
+}
+
+function browsePath() {
+    // In a real implementation, this would open a directory browser
+    const path = prompt('Enter the path to scan:', document.getElementById('target_path').value);
+    if (path) {
+        document.getElementById('target_path').value = path;
+    }
+}
+
+function handleScanSubmit(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const scanType = formData.get('scan_type');
+    const targetPath = formData.get('target_path');
+    
+    if (!targetPath.trim()) {
+        alert('Please specify a target path for scanning.');
+        return;
+    }
+    
+    startScanProgress();
+    
+    // Submit the form
+    event.target.submit();
+}
+
+function quarantineThreat(threatId) {
+    if (confirm('Quarantine this threat? The file will be safely isolated and backed up.')) {
+        window.location.href = `/quarantine_threat/${threatId}`;
+    }
+}
+
+function analyzeThreat(threatId) {
+    // Show threat analysis modal or navigate to details page
+    alert(`Threat analysis for ID: ${threatId} - Feature coming soon!`);
+}
+
+function scanHistory() {
+    window.location.href = '{{ url_for("threats") }}';
+}
+
+function stopScan() {
+    if (confirm('Stop the current scan?')) {
+        // In a real implementation, this would send a stop request to the server
+        document.getElementById('scanProgress').style.display = 'none';
+        document.getElementById('startScanBtn').disabled = false;
+    }
+}
+</script>
+
+<style>
+.spin {
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.btn-check:checked + .btn {
+    transform: scale(1.02);
+}
+
+.progress {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+</style>
+{% endblock %}
