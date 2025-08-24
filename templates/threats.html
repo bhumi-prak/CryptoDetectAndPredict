@@ -505,3 +505,11 @@ function applyFilters() {
 }
 </style>
 {% endblock %}
+
+{% if current_user.threat_details %}
+    {% for threat in current_user.threat_details %}
+        {{ threat.file_path }} - {{ threat.threat_level }}
+    {% endfor %}
+{% else %}
+    <p class="text-muted">No threats detected!</p>
+{% endif %}

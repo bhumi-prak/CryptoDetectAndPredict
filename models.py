@@ -15,6 +15,22 @@ class User(UserMixin, db.Model):
     # Relationship to scan results
     scan_results = db.relationship('ScanResult', backref='user', lazy=True)
     threat_alerts = db.relationship('ThreatAlert', backref='user', lazy=True)
+
+    @property
+    def threat_details(self):
+        details = []
+        for scan in self.scan_results:
+            details.extend(scan.threats)
+        return details
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -98,4 +114,5 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+
 

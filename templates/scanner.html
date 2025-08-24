@@ -109,11 +109,11 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span>Total Scans</span>
-                    <span class="badge bg-primary">{{ current_user.scan_results|length }}</span>
+                    <span class="badge bg-primary">{{ current_user.scan_results|length if current_user.scan_results else 0 }}</span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span>Threats Found</span>
-                    <span class="badge bg-warning">{{ current_user.threat_alerts|length }}</span>
+                    <span class="badge bg-warning">{{ current_user.threat_alerts|length if current_user.threat_alerts else 0 }}</span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span>Files Quarantined</span>
@@ -229,7 +229,7 @@
             </div>
         </div>
         
-        {% if threats %}
+        {% if threats and threats|length > 0 %}
         <h6 class="border-bottom pb-2 mb-3">Detected Threats</h6>
         <div class="table-responsive">
             <table class="table table-dark table-hover">
@@ -301,60 +301,32 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     initializeScanner();
-    
-    // Handle scan type changes
     document.querySelectorAll('input[name="scan_type"]').forEach(radio => {
         radio.addEventListener('change', updateScanType);
     });
-    
-    // Handle form submission
     document.getElementById('scanForm').addEventListener('submit', handleScanSubmit);
 });
 
 function updateScanType() {
     const scanType = document.querySelector('input[name="scan_type"]:checked').value;
     const targetPath = document.getElementById('target_path');
-    
     switch(scanType) {
-        case 'quick':
-            targetPath.value = '/home /tmp /var/tmp';
-            targetPath.readOnly = true;
-            break;
-        case 'full':
-            targetPath.value = '/';
-            targetPath.readOnly = true;
-            break;
-        case 'custom':
-            targetPath.value = '';
-            targetPath.readOnly = false;
-            targetPath.focus();
-            break;
+        case 'quick': targetPath.value = '/home /tmp /var/tmp'; targetPath.readOnly = true; break;
+        case 'full': targetPath.value = '/'; targetPath.readOnly = true; break;
+        case 'custom': targetPath.value = ''; targetPath.readOnly = false; targetPath.focus(); break;
     }
 }
 
 function browsePath() {
-    // In a real implementation, this would open a directory browser
     const path = prompt('Enter the path to scan:', document.getElementById('target_path').value);
-    if (path) {
-        document.getElementById('target_path').value = path;
-    }
+    if (path) document.getElementById('target_path').value = path;
 }
 
 function handleScanSubmit(event) {
     event.preventDefault();
-    
     const formData = new FormData(event.target);
-    const scanType = formData.get('scan_type');
-    const targetPath = formData.get('target_path');
-    
-    if (!targetPath.trim()) {
-        alert('Please specify a target path for scanning.');
-        return;
-    }
-    
+    if (!formData.get('target_path').trim()) { alert('Please specify a target path for scanning.'); return; }
     startScanProgress();
-    
-    // Submit the form
     event.target.submit();
 }
 
@@ -365,17 +337,12 @@ function quarantineThreat(threatId) {
 }
 
 function analyzeThreat(threatId) {
-    // Show threat analysis modal or navigate to details page
     alert(`Threat analysis for ID: ${threatId} - Feature coming soon!`);
 }
 
-function scanHistory() {
-    window.location.href = '{{ url_for("threats") }}';
-}
-
+function scanHistory() { window.location.href = '{{ url_for("threats") }}'; }
 function stopScan() {
     if (confirm('Stop the current scan?')) {
-        // In a real implementation, this would send a stop request to the server
         document.getElementById('scanProgress').style.display = 'none';
         document.getElementById('startScanBtn').disabled = false;
     }
@@ -383,25 +350,10 @@ function stopScan() {
 </script>
 
 <style>
-.spin {
-    animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.btn-check:checked + .btn {
-    transform: scale(1.02);
-}
-
-.progress {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
+.spin { animation: spin 2s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.btn-check:checked + .btn { transform: scale(1.02); }
+.progress { background-color: rgba(255, 255, 255, 0.1); }
+.table-hover tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
 </style>
 {% endblock %}
