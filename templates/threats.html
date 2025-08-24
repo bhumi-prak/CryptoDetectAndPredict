@@ -27,7 +27,9 @@
         <div class="card bg-dark border-danger">
             <div class="card-body text-center">
                 <i class="bi bi-exclamation-triangle-fill text-danger display-6"></i>
-                <div class="h4 mt-2" id="criticalCount">{{ threats.items | selectattr('threat_level', 'equalto', 'critical') | list | length }}</div>
+                <div class="h4 mt-2" id="criticalCount">
+                    {{ current_user.threat_details | selectattr('threat_level', 'equalto', 'critical') | list | length }}
+                </div>
                 <div class="text-muted">Critical</div>
             </div>
         </div>
@@ -36,7 +38,9 @@
         <div class="card bg-dark border-warning">
             <div class="card-body text-center">
                 <i class="bi bi-exclamation-triangle text-warning display-6"></i>
-                <div class="h4 mt-2" id="highCount">{{ threats.items | selectattr('threat_level', 'equalto', 'high') | list | length }}</div>
+                <div class="h4 mt-2" id="highCount">
+                    {{ current_user.threat_details | selectattr('threat_level', 'equalto', 'high') | list | length }}
+                </div>
                 <div class="text-muted">High</div>
             </div>
         </div>
@@ -45,7 +49,9 @@
         <div class="card bg-dark border-info">
             <div class="card-body text-center">
                 <i class="bi bi-info-circle text-info display-6"></i>
-                <div class="h4 mt-2" id="mediumCount">{{ threats.items | selectattr('threat_level', 'equalto', 'medium') | list | length }}</div>
+                <div class="h4 mt-2" id="mediumCount">
+                    {{ current_user.threat_details | selectattr('threat_level', 'equalto', 'medium') | list | length }}
+                </div>
                 <div class="text-muted">Medium</div>
             </div>
         </div>
@@ -54,12 +60,15 @@
         <div class="card bg-dark border-secondary">
             <div class="card-body text-center">
                 <i class="bi bi-shield text-secondary display-6"></i>
-                <div class="h4 mt-2" id="lowCount">{{ threats.items | selectattr('threat_level', 'equalto', 'low') | list | length }}</div>
+                <div class="h4 mt-2" id="lowCount">
+                    {{ current_user.threat_details | selectattr('threat_level', 'equalto', 'low') | list | length }}
+                </div>
                 <div class="text-muted">Low</div>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Filters and Search -->
 <div class="card bg-dark border-secondary mb-4">
@@ -140,7 +149,7 @@
         </div>
     </div>
     <div class="card-body p-0">
-        {% if threats.items %}
+        {% if current_user.threat_details %}
         <div class="table-responsive">
             <table class="table table-dark table-hover mb-0">
                 <thead class="table-dark">
@@ -156,7 +165,7 @@
                     </tr>
                 </thead>
                 <tbody id="threatsTableBody">
-                    {% for threat in threats.items %}
+                    {% for threat in current_user.threat_details %}
                     <tr class="threat-row" data-threat-id="{{ threat.id }}" data-threat-level="{{ threat.threat_level }}" data-status="{% if threat.quarantined %}quarantined{% else %}active{% endif %}">
                         <td>
                             <input type="checkbox" class="form-check-input threat-checkbox" value="{{ threat.id }}">
