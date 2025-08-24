@@ -1,5 +1,9 @@
 import os
 import logging
+from datetime import datetime
+import random
+from flask import render_template, request
+from flask_login import login_required, current_user
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -53,6 +57,58 @@ def basename_filter(path):
 def dirname_filter(path):
     return os.path.dirname(path)
 
+class FakePagination:
+    """Simulate a paginated object for template compatibility."""
+    def __init__(self, items):
+        self.items = items
+        self.total = len(items)
+        self.page = 1
+        self.pages = 1
+        self.has_prev = False
+        self.has_next = False
+
+    def iter_pages(self):
+        return [1]
+
+@app.route('/start_scan', methods=['POST'])
+@login_required
+def start_scan_route():
+    target_path = request.form.get('target_path')
+    scan_type = request.form.get('scan_type', 'quick')
+
+    if not target_path or not os.path.exists(target_path):
+        return render_template('threads.html', error="Invalid path", scan=None, threats=FakePagination([]))
+
+    # --- Simulate threats ---
+    simulated_threats = []
+    for i in range(5):
+        simulated_threats.append({
+            'id': i+1,
+            'file_path': f"/simulated/path/fake_threat_{i}.exe",
+            'threat_level': random.choice(['low','medium','high','critical']),
+            'confidence_score': round(random.uniform(0.7, 0.99), 2),
+            'detected_at': datetime.utcnow(),
+            'quarantined': False,
+            'file_size': random.randint(50_000, 5_000_000),
+            'file_hash': f"{random.getrandbits(128):032x}",
+            'threat_type': 'Ransomware Indicator'
+        })
+
+    scan_result = {
+        'files_scanned': 1000,
+        'threats_found': len(simulated_threats),
+        'threat_details': simulated_threats,
+        'scan_duration': 12.5,
+        'status': 'completed'
+    }
+
+    threats_paginated = FakePagination(simulated_threats)
+
+    return render_template(
+        'threads.html',
+        scan=scan_result,
+        threats=threats_paginated
+    )
 # ---------------- Placeholder File Analyzer ----------------
 class ScanResult:
     def __init__(self, file_path, is_threat=False, entropy=None):
@@ -131,16 +187,32 @@ def start_scan_route():
     target_path = request.form.get('target_path')
     scan_type = request.form.get('scan_type', 'quick')
 
+    # If path is invalid, return empty scan
     if not target_path or not os.path.exists(target_path):
-        return render_template(
-            'scanner.html',
-            error="Invalid path",
-            scan=None,
-            threats=[]
-        )
+        return render_template('scanner.html', error="Invalid path", scan=None, threats=[])
 
-    scan_result = start_scan(target_path, scan_type)
+    # --- Simulate threats ---
+    simulated_threats = []
+    for i in range(5):  # simulate 5 threats
+        simulated_threats.append({
+            'id': i+1,
+            'file_path': f"/simulated/path/fake_threat_{i}.exe",
+            'threat_level': random.choice(['low','medium','high','critical']),
+            'confidence_score': round(random.uniform(0.7, 0.99), 2),
+            'detected_at': datetime.utcnow(),
+            'quarantined': False,
+            'file_size': random.randint(50_000, 5_000_000),  # bytes
+            'file_hash': f"{random.getrandbits(128):032x}",
+            'threat_type': 'Ransomware Indicator'
+        })
 
+    scan_result = {
+        'files_scanned': 1000,
+        'threats_found': len(simulated_threats),
+        'threat_details': simulated_threats,
+        'scan_duration': 12.5,
+        'status': 'completed'
+    }
     # Do not append dicts to SQLAlchemy; just keep in memory for template
     # Optionally, store serialized results in DB if desired
 

@@ -1,55 +1,65 @@
 {% extends "base.html" %}
-
 {% block title %}Threats - RansomGuard{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 fw-bold mb-1">Threat Management</h1>
-        <p class="text-muted mb-0">Review and manage detected security threats</p>
+
+<!-- Scan Summary Cards -->
+{% if scan %}
+<div class="row g-3 mb-4">
+    <div class="col-md-3 text-center">
+        <div class="h4 text-primary">{{ scan.files_scanned }}</div>
+        <div class="text-muted">Files Scanned</div>
     </div>
-    <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary" onclick="exportThreats()">
-            <i class="bi bi-download"></i> Export
-        </button>
-        <button class="btn btn-outline-warning" onclick="quarantineAll()">
-            <i class="bi bi-shield"></i> Quarantine All
-        </button>
-        <a href="{{ url_for('scanner_page') }}" class="btn btn-primary">
-            <i class="bi bi-search"></i> New Scan
-        </a>
+    <div class="col-md-3 text-center">
+        <div class="h4 text-warning">{{ scan.threats_found }}</div>
+        <div class="text-muted">Threats Detected</div>
+    </div>
+    <div class="col-md-3 text-center">
+        <div class="h4 text-info">{{ "%.2f"|format(scan.scan_duration) }}s</div>
+        <div class="text-muted">Scan Duration</div>
+    </div>
+    <div class="col-md-3 text-center">
+        {% if scan.status == 'completed' %}
+        <div class="h4 text-success"><i class="bi bi-check-circle"></i></div>
+        <div class="text-muted">Completed</div>
+        {% elif scan.status == 'scanning' %}
+        <div class="h4 text-warning"><i class="bi bi-hourglass-split"></i></div>
+        <div class="text-muted">In Progress</div>
+        {% else %}
+        <div class="h4 text-danger"><i class="bi bi-x-circle"></i></div>
+        <div class="text-muted">Failed</div>
+        {% endif %}
     </div>
 </div>
+{% endif %}
 
-{% set threats_list = current_user.threat_details if current_user.threat_details else [] %}
-
-<!-- Threat Summary Cards -->
+<!-- Threat Statistics Cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-3">
         <div class="card bg-dark border-danger text-center">
             <i class="bi bi-exclamation-triangle-fill text-danger display-6"></i>
-            <div class="h4 mt-2">{{ threats_list | selectattr('threat_level','equalto','critical') | list | length }}</div>
+            <div class="h4 mt-2">{{ counts['critical'] }}</div>
             <div class="text-muted">Critical</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card bg-dark border-warning text-center">
             <i class="bi bi-exclamation-triangle text-warning display-6"></i>
-            <div class="h4 mt-2">{{ threats_list | selectattr('threat_level','equalto','high') | list | length }}</div>
+            <div class="h4 mt-2">{{ counts['high'] }}</div>
             <div class="text-muted">High</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card bg-dark border-info text-center">
             <i class="bi bi-info-circle text-info display-6"></i>
-            <div class="h4 mt-2">{{ threats_list | selectattr('threat_level','equalto','medium') | list | length }}</div>
+            <div class="h4 mt-2">{{ counts['medium'] }}</div>
             <div class="text-muted">Medium</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card bg-dark border-secondary text-center">
             <i class="bi bi-shield text-secondary display-6"></i>
-            <div class="h4 mt-2">{{ threats_list | selectattr('threat_level','equalto','low') | list | length }}</div>
+            <div class="h4 mt-2">{{ counts['low'] }}</div>
             <div class="text-muted">Low</div>
         </div>
     </div>
@@ -60,64 +70,41 @@
     <div class="card-header bg-dark border-secondary">
         <h5 class="card-title mb-0">
             <i class="bi bi-list-ul text-secondary me-2"></i>
-            Detected Threats ({{ threats_list | length }})
+            Detected Threats ({{ threats.total }})
         </h5>
     </div>
     <div class="card-body p-0">
-        {% if threats_list %}
+        {% if threats.items %}
         <div class="table-responsive">
             <table class="table table-dark table-hover mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th width="30"><input type="checkbox" class="form-check-input" id="selectAllCheckbox"></th>
-                        <th>File Information</th>
-                        <th>Threat Details</th>
-                        <th>Detection Time</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>File Path</th>
+                        <th>Level</th>
+                        <th>Confidence</th>
+                        <th>Quarantine</th>
+                        <th>Detected At</th>
                     </tr>
                 </thead>
-                <tbody id="threatsTableBody">
-                    {% for threat in threats_list %}
-                    <tr class="threat-row" data-threat-level="{{ threat.threat_level }}" data-status="{% if threat.quarantined %}quarantined{% else %}active{% endif %}">
-                        <td><input type="checkbox" class="form-check-input threat-checkbox" value="{{ threat.id }}"></td>
+                <tbody>
+                    {% for threat in threats.items %}
+                    <tr>
+                        <td>{{ threat.file_path }}</td>
                         <td>
-                            <div class="d-flex align-items-start">
-                                <div class="flex-shrink-0 me-3"><i class="bi bi-file-earmark-text text-muted display-6"></i></div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-medium text-truncate" style="max-width:250px;" title="{{ threat.file_path }}">{{ threat.file_path | basename }}</div>
-                                    <div class="text-muted small text-truncate" style="max-width:250px;">{{ threat.file_path | dirname }}</div>
-                                </div>
-                            </div>
+                            {% if threat.threat_level == 'critical' %}<span class="badge bg-danger">Critical</span>
+                            {% elif threat.threat_level == 'high' %}<span class="badge bg-warning">High</span>
+                            {% elif threat.threat_level == 'medium' %}<span class="badge bg-info">Medium</span>
+                            {% else %}<span class="badge bg-secondary">Low</span>{% endif %}
                         </td>
+                        <td>{{ "%.1f"|format(threat.confidence_score * 100) }}%</td>
                         <td>
-                            <div class="mb-2">
-                                {% if threat.threat_level == 'critical' %}<span class="badge bg-danger">Critical</span>
-                                {% elif threat.threat_level == 'high' %}<span class="badge bg-warning">High</span>
-                                {% elif threat.threat_level == 'medium' %}<span class="badge bg-info">Medium</span>
-                                {% else %}<span class="badge bg-secondary">Low</span>{% endif %}
-                            </div>
-                            <div class="small text-muted">{{ threat.threat_type }}</div>
-                            <div class="small">Confidence: {{ "%.1f"|format(threat.confidence_score*100) }}%</div>
-                        </td>
-                        <td>{{ threat.detected_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                        <td>
-                            {% if threat.quarantined %}
-                                <span class="badge bg-warning"><i class="bi bi-shield"></i> Quarantined</span>
+                            {% if not threat.quarantined %}
+                            <button class="btn btn-outline-warning btn-sm" onclick="quarantineThreat({{ threat.id }})">Quarantine</button>
                             {% else %}
-                                <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Active</span>
+                            <span class="badge bg-success">Quarantined</span>
                             {% endif %}
                         </td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                {% if not threat.quarantined %}
-                                <button class="btn btn-outline-warning" onclick="quarantineThreat({{ threat.id }})"><i class="bi bi-shield"></i></button>
-                                {% else %}
-                                <button class="btn btn-outline-success" onclick="restoreThreat({{ threat.id }})"><i class="bi bi-arrow-counterclockwise"></i></button>
-                                {% endif %}
-                                <button class="btn btn-outline-info" onclick="viewThreatDetails({{ threat.id }})"><i class="bi bi-info-circle"></i></button>
-                            </div>
-                        </td>
+                        <td>{{ threat.detected_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -128,9 +115,17 @@
             <i class="bi bi-shield-check text-success display-1"></i>
             <h4 class="text-success mt-3">No threats detected!</h4>
             <p class="text-muted">Your system is currently clean. Run a scan to check for new threats.</p>
-            <a href="{{ url_for('scanner_page') }}" class="btn btn-primary mt-3"><i class="bi bi-search"></i> Start New Scan</a>
         </div>
         {% endif %}
     </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function quarantineThreat(id) {
+    alert(`Quarantining threat ID ${id} (simulated)`); 
+}
+</script>
 {% endblock %}

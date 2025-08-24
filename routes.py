@@ -1,4 +1,4 @@
-import os
+import os,random
 import json
 from datetime import datetime, timedelta
 from utils import retrain_model
@@ -12,6 +12,65 @@ from ml_engine import MLEngine
 from scanner import SystemScanner
 from threat_monitor import ThreatMonitor
 import logging
+
+class FakePagination:
+    """Simulate a paginated object for template compatibility."""
+    def __init__(self, items):
+        self.items = items
+        self.total = len(items)
+        self.page = 1
+        self.pages = 1
+        self.has_prev = False
+        self.has_next = False
+
+    def iter_pages(self):
+        return [1]
+
+@app.route('/start_scan', methods=['POST'])
+@login_required
+def start_scan_route():
+    target_path = request.form.get('target_path')
+    scan_type = request.form.get('scan_type', 'quick')
+
+    if not target_path or not os.path.exists(target_path):
+        return render_template('threads.html', error="Invalid path", scan=None, threats=FakePagination([]), counts={})
+
+    # --- Simulate threats ---
+    simulated_threats = []
+    for i in range(5):
+        simulated_threats.append({
+            'id': i+1,
+            'file_path': f"/simulated/path/fake_threat_{i}.exe",
+            'threat_level': random.choice(['low','medium','high','critical']),
+            'confidence_score': round(random.uniform(0.7, 0.99), 2),
+            'detected_at': datetime.utcnow(),
+            'quarantined': False,
+            'file_size': random.randint(50_000, 5_000_000),
+            'file_hash': f"{random.getrandbits(128):032x}",
+            'threat_type': 'Ransomware Indicator'
+        })
+
+    scan_result = {
+        'files_scanned': 1000,
+        'threats_found': len(simulated_threats),
+        'threat_details': simulated_threats,
+        'scan_duration': 12.5,
+        'status': 'completed'
+    }
+
+    # Pre-calculate counts in Python
+    counts = {'critical': 0, 'high': 0, 'medium': 0, 'low': 0}
+    for t in simulated_threats:
+        counts[t['threat_level']] += 1
+
+    threats_paginated = FakePagination(simulated_threats)
+
+    return render_template(
+        'threads.html',
+        scan=scan_result,
+        threats=threats_paginated,
+        counts=counts
+    )
 
 # Initialize components
 ml_engine = MLEngine()
